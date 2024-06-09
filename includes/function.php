@@ -161,25 +161,19 @@ function authenticateByUserId($user_id) {
   }
 }
 
-
 // Fungsi tambah pengguna
-function register($id_pengguna, $nama_pengguna, $email, $password, $tipe_pengguna) {
+function register($id_pengguna, $nama_pengguna, $email, $password, $tipe_pengguna, $id_karyawan) {
   global $conn;
-
-  $id_pengguna = $id_pengguna;
-  $nama_pengguna = $nama_pengguna;
-  $email = $email;
-  $tipe_pengguna = $tipe_pengguna;
 
   // Hash password
   $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
   // Insert user data into database
-  $query = "INSERT INTO pengguna (id_pengguna, nama_pengguna, email, password, tipe_pengguna) VALUES (?, ?, ?, ?, ?)";
+  $query = "INSERT INTO pengguna (id_pengguna, nama_pengguna, email, password, tipe_pengguna, id_karyawan) VALUES (?, ?, ?, ?, ?, ?)";
   $stmt = mysqli_prepare($conn, $query);
   
   // Bind parameters
-  mysqli_stmt_bind_param($stmt, "sssss", $id_pengguna, $nama_pengguna, $email, $hashed_password, $tipe_pengguna);
+  mysqli_stmt_bind_param($stmt, "ssssss", $id_pengguna, $nama_pengguna, $email, $hashed_password, $tipe_pengguna, $id_karyawan);
   
   // Execute statement
   $result = mysqli_stmt_execute($stmt);
@@ -556,84 +550,6 @@ function isDataInUse($valueToCheck, $tableColumnMap, $additionalColumns = []) {
     return $dataInUse;
 }
 
-function getLastDocumentNumber($tabel, $column, $order_by, $prefix, $suffix, $month, $year) {
-    global $conn;
-
-    // Query untuk mengambil nomor dokumen terbaru dari tabel tertentu berdasarkan kolom tertentu
-    // dan berdasarkan bulan dan tahun yang disediakan
-    $query = "SELECT $column FROM $tabel WHERE YEAR($order_by) = $year AND kategori = 'keluar' ORDER BY $column DESC LIMIT 1";
-
-    // Eksekusi query
-    $result = mysqli_query($conn, $query);
-
-    // Periksa apakah query berhasil dieksekusi
-    if (!$result) {
-        die("Error: " . mysqli_error($conn));
-    }
-
-    // Inisialisasi nomor dokumen terbaru
-    $new_doc_number = '';
-
-    // Periksa apakah ada hasil dari query
-    if (mysqli_num_rows($result) > 0) {
-        // Ambil nomor dokumen terbaru
-        $row = mysqli_fetch_assoc($result);
-        $last_number = $row[$column];
-
-        // Split nomor dokumen terbaru untuk mendapatkan nomor
-        $doc_parts = explode('/', $last_number);
-        $last_doc_digits = intval($doc_parts[0]);
-
-        // Tambahkan 1 pada nomor dokumen terbaru
-        $new_doc_digits = sprintf('%03d', $last_doc_digits + 1);
-        $new_doc_number = $new_doc_digits . '/' . $prefix . '/' . $suffix . '/' . $month . '/' . $year;
-    } else {
-        // Jika tidak ada nomor dokumen terbaru untuk bulan dan tahun yang sama,
-        // buat nomor dokumen baru dimulai dari 001
-        $new_doc_number = '001/' . $prefix . '/' . $suffix . '/' . $month . '/' . $year;
-    }
-
-    return $new_doc_number;
-}
-
-// Fungsi menangani upload gambar
-function handleLogoUpload($file, $allowed_types, $max_file_size, $upload_path)
-{
-    // Memeriksa apakah file gambar logo diunggah
-    if(isset($file['logo']) && $file['logo']['error'] === UPLOAD_ERR_OK) {
-        // Tentukan jenis MIME yang diizinkan
-        $file_type = $file['logo']['type'];
-        
-        // Memeriksa apakah jenis file diizinkan
-        if (!in_array($file_type, $allowed_types)) {
-            return "Jenis file yang diunggah tidak diizinkan. Hanya gambar dengan format JPG, PNG, atau GIF yang diperbolehkan.";
-        }
-        
-        // Memeriksa apakah ukuran file tidak melebihi batas maksimal
-        if ($file['logo']['size'] > $max_file_size) {
-            return "Ukuran file yang diunggah melebihi batas maksimal (2MB).";
-        }
-
-        // Generate nama file acak dan unik
-        $file_extension = pathinfo($file['logo']['name'], PATHINFO_EXTENSION);
-        $file_name = uniqid() . '_' . date('Ymd') . '.' . $file_extension;
-        $file_destination = $upload_path . $file_name;
-
-        // Pindahkan file dari temp ke lokasi tujuan
-        if (!move_uploaded_file($file['logo']['tmp_name'], $file_destination)) {
-            return "Gagal mengunggah file gambar logo.";
-        }
-
-        return $file_destination; // Kembalikan lokasi file gambar logo yang berhasil diunggah
-    } else {
-        // Tidak ada file yang diunggah atau terjadi kesalahan saat mengunggah
-        return "Gagal mengunggah file gambar logo.";
-    }
-}
-
-// function formatRupiah($number) {
-//     return 'Rp ' . number_format($number, 0, ',', '.');
-// }
 
 function formatRupiah($number) {
     return '<div class="d-flex justify-content-between"><span>Rp.</span><span>' . number_format($number, 0, ',', '.') . '</span></div>';
@@ -666,25 +582,43 @@ function getEnum($column_name, $table_name) {
     return $enum_values;
 }
 
-// Fungsi untuk mengubah format Rupiah ke dalam bentuk integer
-function unformatRupiah($rupiah) {
-    return (int) preg_replace('/[^0-9]/', '', $rupiah);
-}
-
-function updateDetailPesanan($id_produk, $id_pesanan, $jumlah_perubahan) {
+function getSingleValue($query, $column) {
+    // Menggunakan koneksi database yang ada
     global $conn;
 
-    // Ambil data detail_pesanan yang sesuai
-    $query = "SELECT jumlah_dikirim, sisa_pesanan FROM detail_pesanan WHERE id_produk = '$id_produk' AND id_pesanan = '$id_pesanan'";
-    $result = mysqli_query($conn, $query);
+    // Melakukan query ke database
+    $result = $conn->query($query);
 
-    if ($result && mysqli_num_rows($result) > 0) {
-        $row = mysqli_fetch_assoc($result);
-        $jumlah_dikirim = $row['jumlah_dikirim'] + $jumlah_perubahan;
-        $sisa_pesanan = $row['sisa_pesanan'] - $jumlah_perubahan;
+    // Memeriksa apakah hasil query mengembalikan satu baris
+    if ($result && $result->num_rows > 0) {
+        // Mengambil baris hasil query
+        $row = $result->fetch_assoc();
 
-        // Update detail_pesanan
-        $query = "UPDATE detail_pesanan SET jumlah_dikirim = '$jumlah_dikirim', sisa_pesanan = '$sisa_pesanan' WHERE id_produk = '$id_produk' AND id_pesanan = '$id_pesanan'";
-        mysqli_query($conn, $query);
+        // Mengembalikan nilai kolom yang diminta
+        return $row[$column];
+    } else {
+        // Jika tidak ada hasil, mengembalikan null
+        return null;
     }
+}
+
+function calculateDuration($start, $end) {
+    $start = strtotime($start);
+    $end = strtotime($end);
+    $duration = $end - $start;
+    $hours = floor($duration / 3600);
+    $minutes = floor(($duration % 3600) / 60);
+    return sprintf('%02d:%02d', $hours, $minutes);
+}
+
+function getStatusPengajuan($id_pengajuan) {
+    global $conn; // Menggunakan koneksi global
+
+    $query = "SELECT status FROM persetujuan_lembur WHERE id_pengajuan = ?";
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param('s', $id_pengajuan);
+    $stmt->execute();
+    $result = $stmt->get_result()->fetch_assoc();
+
+    return $result ? ucwords($result['status']) : 'Pending';
 }

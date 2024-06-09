@@ -1,23 +1,32 @@
 <?php
-$page_title = "Users";
+$page_title = "Pengguna";
 require '../../includes/header.php';
 
-$data_pengguna = selectData('pengguna');
+$mainTable = 'pengguna';
+$joinTables = [
+  ['karyawan', 'pengguna.id_karyawan = karyawan.id_karyawan']
+];
+
+$columns = 'pengguna.*, karyawan.*';
+// $orderBy = 'karyawan.nama_karyawan ASC';
+
+$data_pengguna = selectDataJoin($mainTable, $joinTables, $columns);
 ?>
 <div class="d-flex justify-content-between align-items-center mb-4">
-  <h1 class="fs-5 m-0">Data User</h1>
+  <h1 class="fs-5 m-0">Data Pengguna</h1>
   <button type="button" class="btn btn-primary btn-lg btn-icon btn-add" data-bs-toggle="modal"
     data-bs-target="#addModal">
-    Tambah Data User
+    Tambah Data Pengguna
   </button>
 </div>
 <table id="example" class="table table-hover" style="width:100%">
   <thead>
     <tr>
       <th>No.</th>
-      <th colspan="4">Nama</th>
+      <th colspan="4">Nama Karyawan</th>
+      <th colspan="4">Nama Pengguna</th>
       <th>Email</th>
-      <th>Tipe</th>
+      <th>Tipe Pengguna</th>
       <th>Aksi</th>
     </tr>
   </thead>
@@ -31,7 +40,8 @@ $data_pengguna = selectData('pengguna');
     <?php foreach ($data_pengguna as $pengguna) : ?>
     <tr>
       <td class="text-start"><?= $no; ?></td>
-      <td colspan="4"><?= ucwords($pengguna['nama_pengguna']); ?></td>
+      <td colspan="4"><?= ucwords($pengguna['nama_karyawan']); ?></td>
+      <td colspan="4"><?= $pengguna['nama_pengguna']; ?></td>
       <td><?= $pengguna['email']; ?></td>
       <td>
         <?php
@@ -47,7 +57,7 @@ $data_pengguna = selectData('pengguna');
           <button type="button" class="btn-act btn-edit bg-transparent" data-bs-toggle="modal"
             data-bs-target="#editModal<?= $pengguna['id_pengguna']; ?>" title="Ubah Data"></button>
           <a href="javascript:void(0);"
-            onclick="confirmDelete('del.php?id=<?= $pengguna['id_pengguna']; ?>', 'Apakah Anda yakin ingin menghapus data user ini? Semua data terkait juga akan dihapus dan tidak dapat dikembalikan.')"
+            onclick="confirmDelete('del.php?id=<?= $pengguna['id_pengguna']; ?>', 'Apakah Anda yakin ingin menghapus data Pengguna ini? Semua data terkait juga akan dihapus dan tidak dapat dikembalikan.')"
             class="btn-act btn-del" title="Hapus Data"></a>
         </div>
       </td>

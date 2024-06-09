@@ -11,6 +11,29 @@
       </div>
       <div class="modal-body">
         <form action="process.php" method="POST">
+
+          <!-- Input karyawan -->
+          <div class="row mb-3">
+            <label for="karyawan" class="col-sm-3 col-form-label">Nama Karyawan:</label>
+            <div class="col-sm-9">
+              <select class="form-select form-select-sm" id="karyawan" name="karyawan" required>
+                <option value="" selected disabled>-- Pilih Karyawan --</option>
+                <?php
+                  // Ambil data karyawan dari tabel karyawan
+                $karyawan = selectData("karyawan");
+
+                // Loop untuk menampilkan data karyawan dalam dropdown
+                foreach ($karyawan as $row_karyawan) {
+                    echo '<option value="' . $row_karyawan['id_karyawan'] . '">' . ucwords($row_karyawan['nama_karyawan']) . '</option>';
+                }
+                ?>
+              </select>
+              <div class="invalid-feedback">
+                Harap pilih karyawan yang sesuai.
+              </div>
+            </div>
+          </div>
+
           <div class="row mb-3">
             <label for="nama_pengguna" class="col-sm-3 col-form-label">Nama Pengguna:</label>
             <div class="col-sm-9">
@@ -18,18 +41,21 @@
                 required>
             </div>
           </div>
+
           <div class="row mb-3">
             <label for="email" class="col-sm-3 col-form-label">Email:</label>
             <div class="col-sm-9">
               <input type="email" class="form-control form-control-sm" id="email" name="email" required>
             </div>
           </div>
+
           <div class="row mb-3">
             <label for="password" class="col-sm-3 col-form-label">Password:</label>
             <div class="col-sm-9">
               <input type="password" class="form-control form-control-sm" id="password" name="password" required>
             </div>
           </div>
+
           <div class="row mb-3">
             <label for="confirm_password" class="col-sm-3 col-form-label">Ulangi Password:</label>
             <div class="col-sm-9">
@@ -37,6 +63,7 @@
                 required>
             </div>
           </div>
+
           <div class="row mb-3">
             <label for="tipe_pengguna" class="col-sm-3 col-form-label">Tipe Pengguna:</label>
             <div class="col-sm-9">

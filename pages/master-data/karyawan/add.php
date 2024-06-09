@@ -13,6 +13,7 @@
       <div class="modal-body">
         <form action="process.php" method="POST">
 
+          <!-- Input Nama -->
           <div class="row justify-content-between align-items-end">
             <div class="row mb-3">
               <label for="nama_karyawan" class="col-sm-3 col-form-label">Nama Karyawan:</label>
@@ -60,28 +61,6 @@
                   required>
                 <div class="invalid-feedback">
                   Harap pilih tanggal masuk.
-                </div>
-              </div>
-            </div>
-
-            <!-- Input Pengguna -->
-            <div class="row mb-3">
-              <label for="pengguna" class="col-sm-3 col-form-label">Nama Pengguna:</label>
-              <div class="col-sm-9">
-                <select class="form-select form-select-sm" id="pengguna" name="pengguna" required>
-                  <option value="" selected disabled>-- Pilih Pengguna --</option>
-                  <?php
-                  // Ambil data pengguna dari tabel pengguna
-                $pengguna = selectData("pengguna");
-
-                // Loop untuk menampilkan data pengguna dalam dropdown
-                foreach ($pengguna as $row_pengguna) {
-                    echo '<option value="' . $row_pengguna['id_pengguna'] . '">' . $row_pengguna['nama_pengguna'] . '</option>';
-                }
-                ?>
-                </select>
-                <div class="invalid-feedback">
-                  Harap pilih pengguna yang sesuai.
                 </div>
               </div>
             </div>

@@ -6,9 +6,35 @@ if (!checkLoginStatus()) {
     exit();
 }
 
-
 // Ambil id_pengguna dari sesi atau cookie
 $id_pengguna = $_SESSION['id_pengguna'] ?? $_COOKIE['ingat_user_id'] ?? '';
+
+// Variabel untuk menyimpan data karyawan yang login
+$karyawan_log = [];
+
+if ($id_pengguna) {
+    // Definisikan parameter untuk fungsi selectDataJoin
+    $mainTable = "pengguna";
+    $joinTables = [
+      ["karyawan", "pengguna.id_karyawan = karyawan.id_karyawan"],
+      ["jabatan", "karyawan.id_jabatan = jabatan.id_jabatan"]
+    ];
+    $columns = "pengguna.*, karyawan.*, jabatan.*";
+    $conditions = "pengguna.id_pengguna = '$id_pengguna'";
+
+    // Ambil data karyawan
+    $karyawanData = selectDataJoin($mainTable, $joinTables, $columns, $conditions);
+
+    // Periksa apakah data karyawan ditemukan
+    if (!empty($karyawanData)) {
+        $karyawan_log = $karyawanData[0]; // Ambil data karyawan pertama (seharusnya hanya satu)
+    } else {
+        // Jika data karyawan tidak ditemukan, kosongkan variabel $karyawan
+        $karyawan_log = [];
+    }
+} else {
+    echo "Pengguna tidak terautentikasi.";
+}
 
 // Ambil nama_pengguna dari sesi atau cookie
 $nama_pengguna = $_SESSION['nama_pengguna'] ?? $_COOKIE['nama_pengguna'] ?? '';
@@ -111,7 +137,7 @@ if (isset($_SESSION['error_message'])) {
     /* Ubah ukuran font */
     width: 300px;
     /* Ubah lebar */
-    background: #0077b6 !important;
+    background: #3e3b92 !important;
     /* Ubah warna background */
     color: white;
   }
@@ -211,6 +237,22 @@ if (isset($_SESSION['error_message'])) {
             </div>
           </li>
 
+          <?php if ($_SESSION['peran_pengguna'] === 'pic'): ?>
+          <li>
+            <a href="<?= base_url('pages/pengajuan-lembur'); ?>"
+              class="nav-link text-dark <?= setActivePage('pages/pengajuan-lembur'); ?>">
+              <svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 -960 960 960" width="18px">
+                <path
+                  d="M160-80q-33 0-56.5-23.5T80-160v-440q0-33 23.5-56.5T160-680h200v-120q0-33 23.5-56.5T440-880h80q33 0 56.5 23.5T600-800v120h200q33 0 56.5 23.5T880-600v440q0 33-23.5 56.5T800-80H160Zm0-80h640v-440H600q0 33-23.5 56.5T520-520h-80q-33 0-56.5-23.5T360-600H160v440Zm80-80h240v-18q0-17-9.5-31.5T444-312q-20-9-40.5-13.5T360-330q-23 0-43.5 4.5T276-312q-17 8-26.5 22.5T240-258v18Zm320-60h160v-60H560v60Zm-200-60q25 0 42.5-17.5T420-420q0-25-17.5-42.5T360-480q-25 0-42.5 17.5T300-420q0 25 17.5 42.5T360-360Zm200-60h160v-60H560v60ZM440-600h80v-200h-80v200Zm40 220Z" />
+              </svg>
+              <span class="text-link">
+                Data Lembur
+              </span>
+            </a>
+          </li>
+          <?php endif; ?>
+
+          <?php if ($_SESSION['peran_pengguna'] === 'superadmin' || $_SESSION['peran_pengguna'] === 'staff'): ?>
           <li>
             <a href="<?= base_url('pages/data-lembur'); ?>"
               class="nav-link text-dark <?= setActivePage('pages/data-lembur'); ?>">
@@ -223,8 +265,7 @@ if (isset($_SESSION['error_message'])) {
               </span>
             </a>
           </li>
-
-
+          <?php endif; ?>
 
           <?php if ($_SESSION['peran_pengguna'] === 'superadmin'): ?>
           <li>
@@ -252,24 +293,32 @@ if (isset($_SESSION['error_message'])) {
               style="width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center;">
               <?php
                 // Ubah nama pengguna menjadi huruf besar untuk memastikan konsistensi
-                
-                // Memisahkan nama pengguna menjadi kata-kata terpisah
-                $kata = explode(" ", $nama_pengguna);
+                // Cetak nama karyawan jika data karyawan ditemukan
+                if (!empty($karyawan_log)) {
+                  $nama_karyawan = $karyawan_log['nama_karyawan'];
+                  $jabatan_karyawan = $karyawan_log['nama_jabatan'];
+                  $nama_pengguna = $karyawan_log['nama_pengguna'];
+                  // Memisahkan nama pengguna menjadi kata-kata terpisah
+                  $kata = explode(" ", $nama_karyawan);
 
-                // Inisialisasi variabel untuk menyimpan inisial
-                $inisial = '';
+                  // Inisialisasi variabel untuk menyimpan inisial
+                  $inisial = '';
 
-                // Iterasi melalui setiap kata dalam nama pengguna
-                foreach ($kata as $kata_satu) {
-                    // Ambil huruf pertama dari setiap kata dan tambahkan ke inisial
-                    $inisial .= substr($kata_satu, 0, 1);
+                  // Iterasi melalui setiap kata dalam nama pengguna
+                  foreach ($kata as $kata_satu) {
+                      // Ambil huruf pertama dari setiap kata dan tambahkan ke inisial
+                      $inisial .= substr($kata_satu, 0, 1);
+                  }
+
+                  // Tampilkan inisial
+                  echo strtoupper($inisial);
+                  
+                } else {
+                  echo "Data karyawan tidak ditemukan.";
                 }
-
-                // Tampilkan inisial
-                echo strtoupper($inisial);
                 ?>
             </span>
-            <span class="text-link"><?= ucwords($nama_pengguna); ?></span>
+            <span class="text-link"><?= ucwords($nama_karyawan); ?></span>
           </a>
           <ul class="dropdown-menu dropdown-menu-dark text-small shadow">
             <?php if ($_SESSION['peran_pengguna'] === 'superadmin' || $_SESSION['peran_pengguna'] === 'staff'): ?>
@@ -277,11 +326,23 @@ if (isset($_SESSION['error_message'])) {
             </li>
             <?php endif; ?>
 
-            <!-- <li><a class="dropdown-item" href="#">Settings</a></li> -->
-            <!-- <li><a class="dropdown-item" href="#">Profile</a></li> -->
             <li>
               <hr class="dropdown-divider">
             </li>
+
+            <li class="list-group">
+              <ul>
+                <li class="list-group-item">Info Pengguna:</li>
+                <li class="list-group-item"><?= ucwords($nama_karyawan); ?></li>
+                <li class="list-group-item"><?= ucwords($jabatan_karyawan); ?></li>
+                <li class="list-group-item"><?= ucwords($nama_pengguna); ?></li>
+              </ul>
+            </li>
+
+            <li>
+              <hr class="dropdown-divider">
+            </li>
+
             <li><a class="dropdown-item" href="<?= base_url('auth/logout.php'); ?>">Sign out</a></li>
           </ul>
         </div>

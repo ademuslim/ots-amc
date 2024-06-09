@@ -12,7 +12,6 @@ if (isset($_POST['add'])) {
     $jabatan = strtolower($_POST['jabatan']);
     $telepon = $_POST['telepon'];
     $tanggal_masuk = $_POST['tanggal_masuk'];
-    $id_pengguna_karyawan = $_POST['pengguna'];
     
     if (!empty($telepon) && isValueExists($table_name, 'no_hp', $telepon)) {
         $_SESSION['error_message'] = "Nomor handphone sudah ada dalam database.";
@@ -29,11 +28,10 @@ if (isset($_POST['add'])) {
         'nama_karyawan' => $nama_karyawan,
         'id_jabatan' => $jabatan,
         'no_hp' => $telepon,
-        'tanggal_masuk' => $tanggal_masuk,
-        'id_pengguna' => $id_pengguna_karyawan
+        'tanggal_masuk' => $tanggal_masuk
     ];
 
-  // Panggil fungsi insertData untuk menambahkan data ke dalam tabel kontak
+  // Panggil fungsi insertData untuk menambahkan data ke dalam tabel karyawan
   $result = insertData($table_name, $data);
 
   // Periksa apakah data berhasil ditambahkan
@@ -54,13 +52,13 @@ if (isset($_POST['add'])) {
       ];
       insertData('log_aktivitas', $log_data);
   } else {
-      $_SESSION['error_message'] = "Terjadi kesalahan saat menambahkan kontak.";
+      $_SESSION['error_message'] = "Terjadi kesalahan saat menambahkan karyawan.";
 
       // Pencatatan log aktivitas
       $id_log = Ramsey\Uuid\Uuid::uuid4()->toString();
-      $aktivitas = 'Gagal tambah kontak';
-      $tabel = 'kontak';
-      $keterangan = 'Pengguna dengan ID ' . $id_pengguna . ' gagal tambah kontak ' . $kategori;
+      $aktivitas = 'Gagal tambah karyawan';
+      $tabel = 'karyawan';
+      $keterangan = 'Pengguna dengan ID ' . $id_pengguna . ' gagal tambah karyawan ' . $kategori;
       $log_data = [
           'id_log' => $id_log,
           'id_pengguna' => $id_pengguna,
@@ -74,56 +72,47 @@ if (isset($_POST['add'])) {
   header("Location: index.php");
   exit();
 }elseif (isset($_POST['edit'])) {
-  $id_kontak = $_POST['id_kontak'];
+  $id_karyawan = $_POST['id_karyawan'];
   $nama_karyawan = strtolower($_POST['nama_karyawan']);
-  $telepon = $_POST['telepon'];
   $jabatan = strtolower($_POST['jabatan']);
-  $keterangan = strtolower($_POST['keterangan']);
-  $kategori = strtolower($_POST['category']);
+  $telepon = $_POST['telepon'];
+  $tanggal_masuk = $_POST['tanggal_masuk'];
 
-  // Periksa apakah email atau nomor HP sudah ada, jika tidak kosong dan bukan milik kontak yang sedang diedit
-  if (!empty($email) && isValueExists($table_name, 'email', $email, $id_kontak, 'id_kontak')) {
-    $_SESSION['error_message'] = "Email sudah ada dalam database.";
-    header("Location: index.php");
-    exit();
-  }
-
-  if (!empty($telepon) && isValueExists($table_name, 'telepon', $telepon, $id_kontak, 'id_kontak')) {
+  if (!empty($telepon) && isValueExists($table_name, 'no_hp', $telepon, $id_karyawan, 'id_karyawan')) {
       $_SESSION['error_message'] = "Nomor handphone sudah ada dalam database.";
       header("Location: index.php");
       exit();
   }
 
   // Ambil data lama sebelum diubah
-  $oldData = selectData('kontak', 'id_kontak = ?', '', '', [['type' => 's', 'value' => $id_kontak]]);
+  $oldData = selectData('karyawan', 'id_karyawan = ?', '', '', [['type' => 's', 'value' => $id_karyawan]]);
 
   // Data yang akan diupdate di tabel
   $data = [
     'nama_karyawan' => $nama_karyawan,
-    'email' => $email,
-    'telepon' => $telepon,
-    'jabatan' => $jabatan,
-    'keterangan' => $keterangan
+    'id_jabatan' => $jabatan,
+    'no_hp' => $telepon,
+    'tanggal_masuk' => $tanggal_masuk
   ];
 
-  // Kondisi untuk menentukan kontak mana yang akan diupdate
-  $conditions = "id_kontak = '$id_kontak'";
-  // Panggil fungsi updateData untuk mengupdate data di tabel kontak
+  // Kondisi untuk menentukan karyawan mana yang akan diupdate
+  $conditions = "id_karyawan = '$id_karyawan'";
+  // Panggil fungsi updateData untuk mengupdate data di tabel karyawan
   $result = updateData($table_name, $data, $conditions);
 
   // Periksa apakah data berhasil diupdate
   if ($result > 0) {
-      $_SESSION['success_message'] = "Kontak berhasil diupdate!";
+      $_SESSION['success_message'] = "karyawan berhasil diupdate!";
 
       // Ambil data setelah diubah
-      $newData = selectData('kontak', 'id_kontak = ?', '', '', [['type' => 's', 'value' => $id_kontak]]);
+      $newData = selectData('karyawan', 'id_karyawan = ?', '', '', [['type' => 's', 'value' => $id_karyawan]]);
 
       // Data sebelum dan sesudah perubahan untuk log
       $before = $oldData[0]; // Ambil baris pertama dari hasil query
       $after = $newData[0]; // Ambil baris pertama dari hasil query
 
       // Keterangan perubahan
-      $changeDescription = "Perubahan data kontak: | ";
+      $changeDescription = "Perubahan data karyawan: | ";
 
       // Nomor urut untuk tanda "-"
       $counter = 1;
@@ -140,15 +129,15 @@ if (isset($_POST['add'])) {
       $id_log = Ramsey\Uuid\Uuid::uuid4()->toString();
       $logData = [
         'id_log' => $id_log,
-        'id_pengguna' => $_SESSION['id_pengguna'], // pastikan ini sesuai dengan session atau cara penyimpanan ID pengguna di aplikasi kamu
-        'aktivitas' => 'Ubah Data kontak',
-        'tabel' => 'kontak',
+        'id_pengguna' => $id_pengguna, // pastikan ini sesuai dengan session atau cara penyimpanan ID pengguna di aplikasi kamu
+        'aktivitas' => 'Ubah Data karyawan',
+        'tabel' => 'karyawan',
         'keterangan' => $changeDescription,
       ];
 
       insertData('log_aktivitas', $logData);
   } else {
-      $_SESSION['error_message'] = "Terjadi kesalahan saat mengupdate kontak.";
+      $_SESSION['error_message'] = "Terjadi kesalahan saat mengupdate karyawan.";
   }
 
   header("Location: index.php");

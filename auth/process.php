@@ -78,59 +78,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             header("Location: " . base_url('auth/login.php'));
             exit();
         }
-    } elseif (isset($_POST['register_submit'])) {
-        // Tangani form registrasi jika dikirimkan
-        $nama_pengguna = $_POST["nama_pengguna"];
-        $email = $_POST["email"];
-        $password = $_POST["password"];
-        $confirm_password = $_POST["confirm_password"];
-
-        // Pastikan kedua password tidak kosong
-        if (empty($password) || empty($confirm_password)) {
-            $register_error = "Password dan Ulangi Password harus diisi.";
-            header("Location: " . base_url('auth/register.php?error=' . urlencode($register_error)));
-            exit();
-        }
-
-        // Periksa apakah password dan ulangi password cocok
-        if ($password !== $confirm_password) {
-            // Jika tidak cocok, kembalikan ke halaman registrasi dengan pesan kesalahan
-            $register_error = "Password dan Ulangi Password tidak cocok.";
-            header("Location: " . base_url('auth/register.php?error=' . urlencode($register_error)));
-            exit();
-        }
-
-          // Periksa apakah email sudah ada
-        if (isValueExists('pengguna', 'email', $email)) {
-            $register_error = "Email sudah terdaftar.";
-            header("Location: " . base_url('auth/register.php?error=' . urlencode($register_error)));
-            exit();
-        }
-
-        // Lakukan sanitasi pada input
-        $nama_pengguna = sanitizeInput($nama_pengguna);
-        $email = sanitizeInput($email);
-        $password = sanitizeInput($password);
-        
-        // Generate UUID untuk kolom id_pengguna
-        $id_pengguna = Ramsey\Uuid\Uuid::uuid4()->toString();
-
-        $tipe_pengguna = 'staff'; //default tipe pengguna
-
-
-        // Lakukan registrasi pengguna
-        $result = register($id_pengguna, $nama_pengguna, $email, $password, $tipe_pengguna);
-
-        if ($result) {
-            // Registrasi berhasil, redirect ke halaman login
-            header("Location: " . base_url('auth/login.php'));
-            exit();
-        } else {
-            // Gagal melakukan registrasi
-            $register_error = "Gagal melakukan registrasi. Silakan coba lagi.";
-            header("Location: " . base_url('auth/register.php?error=' . urlencode($register_error)));
-            exit();
-        }
     }
 } else {
     // Jika bukan metode POST, arahkan ke halaman login

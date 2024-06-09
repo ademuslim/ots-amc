@@ -2,7 +2,17 @@
 $page_title = "Data Lembur";
 require '../../includes/header.php';
 
-$data_pengajuan_lembur = selectData('pengajuan_lembur', "", "tanggal_pengajuan DESC, waktu_mulai ASC");
+$id_karyawan_log = $karyawan_log['id_karyawan'];
+// Ambil data pengajuan lembur berdasarkan id_karyawan
+$conditions = "id_karyawan = ?";
+$bind_params = [
+    [
+        'type' => 's', // 's' untuk tipe string (UUID)
+        'value' => $id_karyawan_log
+    ]
+];
+
+$data_pengajuan_lembur = selectData('pengajuan_lembur', $conditions, "", "", $bind_params);
 ?>
 <div class="d-flex justify-content-between align-items-center mb-4">
   <h1 class="fs-5 m-0">Data Lembur</h1>
@@ -17,7 +27,6 @@ $data_pengajuan_lembur = selectData('pengajuan_lembur', "", "tanggal_pengajuan D
       <th>No.</th>
       <th>ID Pengajuan</th>
       <th>Tanggal</th>
-      <th>Status</th>
       <th>Waktu Mulai</th>
       <th>Waktu Selesai</th>
       <th>Durasi Lembur</th>
@@ -37,37 +46,33 @@ $data_pengajuan_lembur = selectData('pengajuan_lembur', "", "tanggal_pengajuan D
       <td class="text-start"><?= $no; ?></td>
       <td class="text-primary"><?= $pengajuan['id_pengajuan']; ?></td>
       <td><?= dateID($pengajuan['tanggal_pengajuan']) ?></td>
-      <td><?= getStatusPengajuan($pengajuan['id_pengajuan']) ?></td>
       <td><?= date('H:i', strtotime($pengajuan['waktu_mulai'])) ?></td>
       <td><?= date('H:i', strtotime($pengajuan['waktu_selesai'])) ?></td>
       <td><?= calculateDuration($pengajuan['waktu_mulai'], $pengajuan['waktu_selesai']) ?></td>
       <td><?= ucwords($pengajuan['keterangan']) ?></td>
-
-      <?php if ($_SESSION['peran_pengguna'] === 'staff'): ?>
       <td>
         <div class="btn-group">
-          <button type="button" class="btn-act btn-approve bg-transparent" data-bs-toggle="modal"
-            data-bs-target="#approveModal<?= $pengajuan['id_pengajuan']; ?>" title="Setujui Pengajuan"></button>
+          <button type="button" class="btn-act btn-edit bg-transparent" data-bs-toggle="modal"
+            data-bs-target="#editModal<?= $pengajuan['id_pengajuan']; ?>" title="Ubah Data"></button>
           <a href="javascript:void(0);"
             onclick="confirmDelete('del.php?id=<?= $pengajuan['id_pengajuan']; ?>', 'Apakah Anda yakin ingin menghapus data ini? Data yang sudah dihapus tidak dapat dikembalikan.')"
             class="btn-act btn-del" title="Hapus Data"></a>
         </div>
       </td>
-      <?php endif; ?>
     </tr>
 
-    <!-- Modal Approve -->
-    <div class="modal fade" id="approveModal<?= $pengajuan['id_pengajuan']; ?>" data-bs-backdrop="static" tabindex="-1"
-      aria-labelledby="approveModalLabel" aria-hidden="true">
+    <!-- Modal Edit -->
+    <div class="modal fade" id="editModal<?= $pengajuan['id_pengajuan']; ?>" data-bs-backdrop="static" tabindex="-1"
+      aria-labelledby="editModalLabel" aria-hidden="true">
       <div class="modal-dialog modal-lg">
         <div class="modal-content">
           <div class="modal-header">
-            <h1 class="modal-title fs-5" id="approveModalLabel">Setujui Pengajuan Lembur</h1>
+            <h1 class="modal-title fs-5" id="editModalLabel">Edit Pengajuan Lembur</h1>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            <?php include 'approve.php'; ?>
-            <!-- Include file approve.php untuk konten modal persetujuan -->
+            <?php include 'edit.php'; ?>
+            <!-- Include file edit.php untuk konten modal edit -->
           </div>
         </div>
       </div>

@@ -7,6 +7,7 @@ $id_pengguna_log = $_SESSION['id_pengguna'] ?? $_COOKIE['ingat_user_id'] ?? '';
 
 if (isset($_POST['add'])) {
   // Ambil nilai-nlai langsung dari $_POST
+  $id_karyawan = $_POST['karyawan'];
   $nama_pengguna = strtolower($_POST['nama_pengguna']);
   $email = $_POST['email'];
   $password = $_POST['password'];
@@ -44,7 +45,7 @@ if (isset($_POST['add'])) {
   $id_pengguna = Ramsey\Uuid\Uuid::uuid4()->toString();
 
   // Lakukan registrasi pengguna (Insert)
-  $result = register($id_pengguna, $nama_pengguna, $email, $password, $tipe_pengguna);
+  $result = register($id_pengguna, $nama_pengguna, $email, $password, $tipe_pengguna, $id_karyawan);
 
   // Periksa apakah data berhasil ditambahkan
   if ($result > 0) {
