@@ -2,20 +2,35 @@
 $page_title = "Data Lembur";
 require '../../includes/header.php';
 
-$data_pengajuan_lembur = selectData('pengajuan_lembur', "", "tanggal_pengajuan DESC, waktu_mulai ASC");
+$mainTable = 'pengajuan_lembur';
+$joinTables = [
+  ['karyawan', 'pengajuan_lembur.id_karyawan = karyawan.id_karyawan']
+];
+
+$columns = 'pengajuan_lembur.*, karyawan.nama_karyawan';
+$orderBy = 'pengajuan_lembur.tanggal_pengajuan DESC';
+
+$data_pengajuan_lembur = selectDataJoin($mainTable, $joinTables, $columns, "", $orderBy);
+
+// $data_pengajuan_lembur = selectData('pengajuan_lembur', "", "tanggal_pengajuan DESC, waktu_mulai ASC");
 ?>
 <div class="d-flex justify-content-between align-items-center mb-4">
   <h1 class="fs-5 m-0">Data Lembur</h1>
+
+  <?php if ($_SESSION['peran_pengguna'] === 'pic'): ?>
   <button type="button" class="btn btn-primary btn-lg btn-icon btn-add" data-bs-toggle="modal"
     data-bs-target="#addModal">
     Buat Pengajuan Lembur
   </button>
+  <?php endif; ?>
 </div>
+
 <table id="example" class="table nowrap table-hover" style="width:100%">
   <thead>
     <tr>
       <th>No.</th>
       <th>ID Pengajuan</th>
+      <th>Nama Karyawan</th>
       <th>Tanggal</th>
       <th>Status</th>
       <th>Waktu Mulai</th>
@@ -35,9 +50,26 @@ $data_pengajuan_lembur = selectData('pengajuan_lembur', "", "tanggal_pengajuan D
     <?php foreach ($data_pengajuan_lembur as $pengajuan) : ?>
     <tr>
       <td class="text-start"><?= $no; ?></td>
-      <td class="text-primary"><?= $pengajuan['id_pengajuan']; ?></td>
+      <td><?= $pengajuan['id_pengajuan']; ?></td>
+      <td class="text-primary"><?= ucwords($pengajuan['nama_karyawan']); ?></td>
       <td><?= dateID($pengajuan['tanggal_pengajuan']) ?></td>
-      <td><?= getStatusPengajuan($pengajuan['id_pengajuan']) ?></td>
+
+      <td>
+        <?php
+          // Tentukan kelas bootstrap berdasarkan nilai status
+          $status_class = '';
+          $status_value = getStatusPengajuan($pengajuan['id_pengajuan']);
+          if ($status_value == 'pending') {
+              $status_class = 'text-bg-warning';
+          } elseif ($status_value == 'ditolak') {
+              $status_class = 'text-bg-danger';
+          } elseif ($status_value == 'disetujui') {
+              $status_class = 'text-bg-success';
+          }
+        ?>
+        <span class="badge <?= $status_class ?>"><?= ucfirst($status_value) ?></span>
+      </td>
+
       <td><?= date('H:i', strtotime($pengajuan['waktu_mulai'])) ?></td>
       <td><?= date('H:i', strtotime($pengajuan['waktu_selesai'])) ?></td>
       <td><?= calculateDuration($pengajuan['waktu_mulai'], $pengajuan['waktu_selesai']) ?></td>

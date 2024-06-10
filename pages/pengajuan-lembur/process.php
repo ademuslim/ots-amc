@@ -16,7 +16,7 @@ if (isset($_POST['add'])) {
     
   $id_pengajuan = Ramsey\Uuid\Uuid::uuid4()->toString();
 
-  // Data yang akan dimasukkan ke dalam tabel produk
+  // Data yang akan dimasukkan ke dalam tabel pengajuan_lembur
   $data = [
       'id_pengajuan' => $id_pengajuan,
       'tanggal_pengajuan' => $tanggal_pengajuan,
@@ -26,12 +26,28 @@ if (isset($_POST['add'])) {
       'id_karyawan' => $id_karyawan
   ];
 
-  // Panggil fungsi insertData untuk menambahkan data ke dalam tabel kontak
+  // Panggil fungsi insertData untuk menambahkan data ke dalam tabel pengajuan_lembur
   $result = insertData($table_name, $data);
 
   // Periksa apakah data berhasil ditambahkan
   if ($result > 0) {
-      $_SESSION['success_message'] = "pengajuan lembur berhasil dibuat!";
+      $_SESSION['success_message'] = "Pengajuan lembur berhasil dibuat!";
+
+      // Buat status default "pending" persetujuan_lembur
+      $id_persetujuan = Ramsey\Uuid\Uuid::uuid4()->toString();
+      $status = "pending";
+
+      // Data default yang akan dimasukkan ke dalam tabel persetujuan_lembur
+      $persetujuan_lembur_data = [
+          'id_persetujuan' => $id_persetujuan,
+          'id_pengajuan' => $id_pengajuan,
+          // 'disetujui_oleh' => $disetujui_oleh,
+          // 'tanggal_persetujuan' => $tanggal_persetujuan,
+          'status' => $status
+      ];
+
+      // Panggil fungsi insertData untuk menambahkan data ke dalam tabel pengajuan_lembur
+      insertData('persetujuan_lembur', $persetujuan_lembur_data);
 
       // Pencatatan log aktivitas
       $id_log = Ramsey\Uuid\Uuid::uuid4()->toString();

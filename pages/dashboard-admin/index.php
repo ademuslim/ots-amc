@@ -2,20 +2,14 @@
 $page_title = "Dashboard";
 require_once '../../includes/header.php';
 
-// Ambil data lembur karyawan
-$id_karyawan = $karyawan_log['id_karyawan'] ?? null; // Ubah cara mendapatkan ID karyawan
-$status = 'disetujui';
-$karyawanLemburData = getLemburData($id_karyawan, $status);
+// Ambil semua data lembur dari semua karyawan
+$karyawanLemburData = getAllLemburData();
 
 // Proses data lembur ke dalam array tanggal
 $lemburDates = [];
 foreach ($karyawanLemburData as $lembur) {
     $lemburDates[$lembur['tanggal_pengajuan']] = true;
 }
-
-// Mendapatkan bulan dan tahun yang dipilih (jika ada), atau gunakan nilai default bulan saat ini
-$selectedMonth = isset($_GET['month']) ? $_GET['month'] : date('m');
-$selectedYear = isset($_GET['year']) ? $_GET['year'] : date('Y');
 
 // Daftar bulan dalam bahasa Indonesia
 $bulanIndonesia = [
@@ -32,6 +26,10 @@ $bulanIndonesia = [
     '11' => 'November',
     '12' => 'Desember'
 ];
+
+// Mendapatkan bulan dan tahun yang dipilih (jika ada), atau gunakan nilai default bulan saat ini
+$selectedMonth = isset($_GET['month']) ? $_GET['month'] : date('m');
+$selectedYear = isset($_GET['year']) ? $_GET['year'] : date('Y');
 
 // Mendefinisikan array untuk menampung tanggal dalam bulan yang dipilih
 $dates = [];
@@ -64,7 +62,7 @@ $currentMonthYear = formatTanggalIndonesia($currentDate);
   <div class="col">
     <div class="card d-flex flex-column h-100">
       <div class="card-header">
-        Data Lembur Anda Bulan <?= $bulanIndonesia[$selectedMonth] . ' ' . $selectedYear ?>
+        Data Lembur Semua Karyawan
       </div>
       <div class="card-body">
         <form action="" method="GET">

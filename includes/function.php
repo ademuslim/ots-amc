@@ -48,10 +48,14 @@ function setActivePage($page) {
 
 // Fungsi mengarahkan pengguna
 function redirectUser($role) {
-  if ($role === 'superadmin' || $role === 'staff' || $role === 'pic' || $role === 'dept. head') {
+  if ($role === 'superadmin' || $role === 'staff' || $role === 'dept. head') {
       // Arahkan superadmin dan staff ke dashboard
-      header("Location: " . base_url('pages/dashboard'));
+      header("Location: " . base_url('pages/dashboard-admin'));
       exit();
+  } elseif ($role === 'pic') {
+    // Arahkan superadmin dan staff ke dashboard
+    header("Location: " . base_url('pages/dashboard'));
+    exit();
   } else {
       // Jika role tidak valid, arahkan pengguna ke halaman login
       header("Location: " . base_url('auth/login.php'));
@@ -614,11 +618,136 @@ function calculateDuration($start, $end) {
 function getStatusPengajuan($id_pengajuan) {
     global $conn; // Menggunakan koneksi global
 
-    $query = "SELECT status FROM persetujuan_lembur WHERE id_pengajuan = ?";
+    $query =    "SELECT status 
+                FROM persetujuan_lembur 
+                WHERE id_pengajuan = ? 
+                ORDER BY tanggal_persetujuan DESC 
+                LIMIT 1"; // Mengambil hasil terbaru berdasarkan tanggal_persetujuan
     $stmt = $conn->prepare($query);
     $stmt->bind_param('s', $id_pengajuan);
     $stmt->execute();
     $result = $stmt->get_result()->fetch_assoc();
 
-    return $result ? ucwords($result['status']) : 'Pending';
+    return $result ? $result['status'] : 'pending'; // Mengembalikan status yang ada di database atau 'pending' jika tidak ditemukan
+}
+
+
+function getLemburData($id_karyawan = null, $status = null) {
+    global $conn;
+
+    $query = "SELECT pl.tanggal_pengajuan, pl.id_pengajuan, pl.keterangan, 
+                     pl.waktu_mulai, pl.waktu_selesai, 
+                     pls.status
+              FROM pengajuan_lembur pl
+              INNER JOIN persetujuan_lembur pls 
+              ON pl.id_pengajuan = pls.id_pengajuan
+              INNER JOIN (
+                  SELECT id_pengajuan, MAX(tanggal_persetujuan) AS max_tanggal
+                  FROM persetujuan_lembur
+                  GROUP BY id_pengajuan
+              ) latest_approval 
+              ON pls.id_pengajuan = latest_approval.id_pengajuan
+              AND pls.tanggal_persetujuan = latest_approval.max_tanggal
+              WHERE 1=1";
+
+    // Tambahkan kondisi WHERE jika id_karyawan ditentukan
+    $params = [];
+    $types = '';
+    if ($id_karyawan !== null) {
+        $query .= " AND pl.id_karyawan = ?";
+        $types .= 's';
+        $params[] = $id_karyawan;
+    }
+
+    // Tambahkan kondisi WHERE jika status ditentukan
+    if ($status !== null) {
+        $query .= " AND pls.status = ?";
+        $types .= 's';
+        $params[] = $status;
+    }
+
+    $stmt = $conn->prepare($query);
+
+    // Binding parameter jika ada
+    if (!empty($params)) {
+        $stmt->bind_param($types, ...$params);
+    }
+
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    $data = [];
+    while ($row = $result->fetch_assoc()) {
+        $data[] = $row;
+    }
+
+    return $data;
+}
+
+function formatTanggalIndonesia($tanggal) {
+    $bulanIndonesia = [
+        1 => 'Januari',
+        2 => 'Februari',
+        3 => 'Maret',
+        4 => 'April',
+        5 => 'Mei',
+        6 => 'Juni',
+        7 => 'Juli',
+        8 => 'Agustus',
+        9 => 'September',
+        10 => 'Oktober',
+        11 => 'November',
+        12 => 'Desember'
+    ];
+
+    $tanggal = new DateTime($tanggal);
+    $bulan = $bulanIndonesia[(int)$tanggal->format('m')];
+    $tahun = $tanggal->format('Y');
+    $hari = $tanggal->format('d');
+
+    return "$bulan $tahun"; // Format "Bulan Tahun" seperti "Januari 2023"
+}
+
+// Buat fungsi baru untuk mengambil semua data lembur dari semua karyawan
+function getAllLemburData($status = null, $month = null, $year = null) {
+    global $conn;
+
+    // Query untuk mengambil data lembur dari semua karyawan
+    $query = "SELECT pl.tanggal_pengajuan, pl.id_pengajuan, pl.keterangan, 
+                     pl.waktu_mulai, pl.waktu_selesai, 
+                     pls.status
+              FROM pengajuan_lembur pl
+              INNER JOIN persetujuan_lembur pls ON pl.id_pengajuan = pls.id_pengajuan";
+
+    // Tambahkan kondisi WHERE jika status ditentukan
+    if ($status !== null) {
+        $query .= " WHERE pls.status = ?";
+    }
+
+    // Jika bulan dan tahun ditentukan, tambahkan kondisi untuk memfilter data berdasarkan bulan dan tahun
+    if ($month !== null && $year !== null) {
+        $query .= " AND MONTH(pl.tanggal_pengajuan) = ? AND YEAR(pl.tanggal_pengajuan) = ?";
+    }
+
+    $stmt = $conn->prepare($query);
+
+    // Binding parameter status jika ditentukan
+    if ($status !== null) {
+        $stmt->bind_param('s', $status);
+    }
+
+    // Binding parameter bulan dan tahun jika ditentukan
+    if ($month !== null && $year !== null) {
+        $stmt->bind_param('ss', $month, $year);
+    }
+
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    $data = [];
+    while ($row = $result->fetch_assoc()) {
+        $data[] = $row;
+    }
+
+    return $data;
 }

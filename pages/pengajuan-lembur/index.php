@@ -5,6 +5,7 @@ require '../../includes/header.php';
 $id_karyawan_log = $karyawan_log['id_karyawan'];
 // Ambil data pengajuan lembur berdasarkan id_karyawan
 $conditions = "id_karyawan = ?";
+$orderBy = 'pengajuan_lembur.tanggal_pengajuan DESC';
 $bind_params = [
     [
         'type' => 's', // 's' untuk tipe string (UUID)
@@ -12,7 +13,7 @@ $bind_params = [
     ]
 ];
 
-$data_pengajuan_lembur = selectData('pengajuan_lembur', $conditions, "", "", $bind_params);
+$data_pengajuan_lembur = selectData('pengajuan_lembur', $conditions, $orderBy, "", $bind_params);
 ?>
 <div class="d-flex justify-content-between align-items-center mb-4">
   <h1 class="fs-5 m-0">Data Lembur</h1>
@@ -27,6 +28,7 @@ $data_pengajuan_lembur = selectData('pengajuan_lembur', $conditions, "", "", $bi
       <th>No.</th>
       <th>ID Pengajuan</th>
       <th>Tanggal</th>
+      <th>Status</th>
       <th>Waktu Mulai</th>
       <th>Waktu Selesai</th>
       <th>Durasi Lembur</th>
@@ -46,6 +48,23 @@ $data_pengajuan_lembur = selectData('pengajuan_lembur', $conditions, "", "", $bi
       <td class="text-start"><?= $no; ?></td>
       <td class="text-primary"><?= $pengajuan['id_pengajuan']; ?></td>
       <td><?= dateID($pengajuan['tanggal_pengajuan']) ?></td>
+
+      <td>
+        <?php
+          // Tentukan kelas bootstrap berdasarkan nilai status
+          $status_class = '';
+          $status_value = getStatusPengajuan($pengajuan['id_pengajuan']);
+          if ($status_value == 'pending') {
+              $status_class = 'text-bg-warning';
+          } elseif ($status_value == 'ditolak') {
+              $status_class = 'text-bg-danger';
+          } elseif ($status_value == 'disetujui') {
+              $status_class = 'text-bg-success';
+          }
+        ?>
+        <span class="badge <?= $status_class ?>"><?= ucfirst($status_value) ?></span>
+      </td>
+
       <td><?= date('H:i', strtotime($pengajuan['waktu_mulai'])) ?></td>
       <td><?= date('H:i', strtotime($pengajuan['waktu_selesai'])) ?></td>
       <td><?= calculateDuration($pengajuan['waktu_mulai'], $pengajuan['waktu_selesai']) ?></td>

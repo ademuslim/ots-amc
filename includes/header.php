@@ -151,6 +151,42 @@ if (isset($_SESSION['error_message'])) {
     font-size: 1rem;
     /* Ubah ukuran tombol close */
   }
+
+  /* Dashboard */
+  .calendar {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    /* Rata kiri */
+    align-content: flex-start;
+    gap: 4px;
+    /* Tambahkan gap antara kotak kalender */
+  }
+
+  .day {
+    width: calc(100% / 7 - 8px);
+    /* 7 hari dalam seminggu dan sedikit margin */
+    height: 40px;
+    /* Atur tinggi kotak */
+    background-color: #ccc;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 12px;
+    color: #000;
+  }
+
+  .day.lembur {
+    background-color: green;
+    color: white;
+  }
+
+  @media (max-width: 768px) {
+    .day {
+      width: calc(100% / 7 - 8px);
+      /* Sesuaikan lebar untuk layar kecil */
+    }
+  }
   </style>
 </head>
 
@@ -172,6 +208,24 @@ if (isset($_SESSION['error_message'])) {
         </div>
         <hr>
         <ul>
+          <!-- Dashboard Staff Admin dan Superadmin -->
+          <?php if ($_SESSION['peran_pengguna'] === 'superadmin' || $_SESSION['peran_pengguna'] === 'staff'): ?>
+          <li>
+            <a href="<?= base_url('pages/dashboard-admin'); ?>"
+              class="nav-link text-dark <?= setActivePage('pages/dashboard-admin'); ?>">
+              <svg xmlns="http://www.w3.org/2000/svg" height="18" viewBox="0 -960 960 960" width="18">
+                <path
+                  d="M520-600v-240h320v240H520ZM120-440v-400h320v400H120Zm400 320v-400h320v400H520Zm-400 0v-240h320v240H120Zm80-400h160v-240H200v240Zm400 320h160v-240H600v240Zm0-480h160v-80H600v80ZM200-200h160v-80H200v80Zm160-320Zm240-160Zm0 240ZM360-280Z" />
+              </svg>
+              <span class="text-link">
+                Dashboard
+              </span>
+            </a>
+          </li>
+          <?php endif; ?>
+
+          <!-- Dashboard PIC -->
+          <?php if ($_SESSION['peran_pengguna'] === 'pic'): ?>
           <li>
             <a href="<?= base_url('pages/dashboard'); ?>"
               class="nav-link text-dark <?= setActivePage('pages/dashboard'); ?>">
@@ -184,7 +238,9 @@ if (isset($_SESSION['error_message'])) {
               </span>
             </a>
           </li>
+          <?php endif; ?>
 
+          <?php if ($_SESSION['peran_pengguna'] === 'superadmin' || $_SESSION['peran_pengguna'] === 'staff'): ?>
           <li>
             <div class="accordion accordion-flush" style="background-color: transparent;" id="accordionFlushMasterData">
               <div class="accordion-item">
@@ -236,6 +292,7 @@ if (isset($_SESSION['error_message'])) {
               </div>
             </div>
           </li>
+          <?php endif; ?>
 
           <?php if ($_SESSION['peran_pengguna'] === 'pic'): ?>
           <li>

@@ -7,8 +7,8 @@ $disetujui_oleh = $karyawan_log['id_karyawan'];
     <label for="status" class="form-label">Status:</label>
     <select class="form-select" id="status" name="status" required>
       <option value="">Pilih Status</option>
-      <option value="Disetujui">Disetujui</option>
-      <option value="Ditolak">Ditolak</option>
+      <option value="disetujui">Disetujui</option>
+      <option value="ditolak">Ditolak</option>
     </select>
   </div>
   <input type="hidden" name="id_pengajuan" value="<?= $pengajuan['id_pengajuan'] ?>">
