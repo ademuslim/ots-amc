@@ -13,11 +13,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $expiry_time = 86400; // Satu hari (24 jam * 60 menit * 60 detik)
     if (isset($_POST['login_submit'])) {
         // Tangani form login jika dikirimkan
-        $email = $_POST["email"];
+        $username = $_POST["username"];
         $password = $_POST["password"];
 
         // Lakukan autentikasi pengguna
-        $user = authenticateUser($email, $password);
+        $user = authenticateUser($username, $password);
 
         if ($user) {
             // Simpan informasi pengguna ke sesi
@@ -29,7 +29,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $id_log = Ramsey\Uuid\Uuid::uuid4()->toString();
             $aktivitas = 'Login berhasil';
             $tabel = 'pengguna';
-            $keterangan = 'Pengguna dengan email ' . $email . ' berhasil login.';
+            $keterangan = 'Pengguna dengan username ' . $username . ' berhasil login.';
             $log_data = [
                 'id_log' => $id_log,
                 'id_pengguna' => $id_pengguna,
@@ -60,13 +60,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             exit();
         } else {
             // Jika autentikasi gagal, tampilkan pesan kesalahan dan simpan ke dalam session
-            $_SESSION['login_error'] = "Email dan password salah. Silakan coba lagi.";
+            $_SESSION['login_error'] = "Username atau password salah. Silakan coba lagi.";
 
             // Pencatatan log aktivitas
             $id_log = Ramsey\Uuid\Uuid::uuid4()->toString();
             $aktivitas = 'Login gagal';
             $tabel = 'pengguna';
-            $keterangan = 'Gagal login dengan email ' . $email . '. Email atau password salah.';
+            $keterangan = 'Gagal login dengan username ' . $username . '. Username atau password salah.';
             $log_data = [
                 'id_log' => $id_log,
                 'aktivitas' => $aktivitas,

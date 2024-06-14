@@ -25,7 +25,6 @@ $data_pengguna = selectDataJoin($mainTable, $joinTables, $columns);
       <th>No.</th>
       <th colspan="4">Nama Karyawan</th>
       <th colspan="4">Nama Pengguna</th>
-      <th>Email</th>
       <th>Tipe Pengguna</th>
       <th>Aksi</th>
     </tr>
@@ -42,7 +41,6 @@ $data_pengguna = selectDataJoin($mainTable, $joinTables, $columns);
       <td class="text-start"><?= $no; ?></td>
       <td colspan="4"><?= ucwords($pengguna['nama_karyawan']); ?></td>
       <td colspan="4"><?= $pengguna['nama_pengguna']; ?></td>
-      <td><?= $pengguna['email']; ?></td>
       <td>
         <?php
         if ($pengguna['tipe_pengguna'] == 'kepala_perusahaan'){

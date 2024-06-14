@@ -53,7 +53,8 @@ $currentMonthYear = formatTanggalIndonesia($currentDate);
     <div class="card custom-card d-flex flex-column h-100">
       <div class="card-body">
         <h5 class="card-title">Selamat Datang, <?= ucwords($karyawan_log['nama_karyawan']); ?></h5>
-        <h6 class="card-subtitle">Sistem Lembur, Home Care</h6>
+        <h6 class="card-subtitle">Sistem Lembur, Home Care Unit</h6>
+        <h6 class="card-subtitle">Lippo Cikarang</h6>
       </div>
     </div>
   </div>

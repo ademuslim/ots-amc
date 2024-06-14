@@ -110,13 +110,13 @@ function getUserRoleById($user_id) {
 }
 
 // Fungsi otentikasi pengguna berdasarkan email dan password
-function authenticateUser($email, $password) {
+function authenticateUser($username, $password) {
   global $conn; // Gunakan koneksi database dari objek global
 
   // Ambil haquotationsh password dari database berdasarkan email
-  $query = "SELECT id_pengguna, tipe_pengguna, nama_pengguna, password FROM pengguna WHERE email = ?";
+  $query = "SELECT id_pengguna, tipe_pengguna, nama_pengguna, password FROM pengguna WHERE nama_pengguna = ?";
   $stmt = mysqli_prepare($conn, $query);
-  mysqli_stmt_bind_param($stmt, "s", $email);
+  mysqli_stmt_bind_param($stmt, "s", $username);
   mysqli_stmt_execute($stmt);
   mysqli_stmt_store_result($stmt);
 
@@ -126,7 +126,6 @@ function authenticateUser($email, $password) {
   // Fetch value
   mysqli_stmt_fetch($stmt);
 
-  // Periksa apakah ada baris yang cocok dengan email yang diberikan
   if (mysqli_stmt_num_rows($stmt) > 0) {
       // Verifikasi password
       if (password_verify($password, $hashed_password)) {
@@ -141,7 +140,7 @@ function authenticateUser($email, $password) {
           return null;
       }
   } else {
-      // Jika tidak ada baris yang cocok dengan email yang diberikan, kembalikan null
+      // Jika tidak ada baris yang cocok dengan username yang diberikan, kembalikan null
       return null;
   }
 }

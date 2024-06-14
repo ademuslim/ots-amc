@@ -42,13 +42,13 @@ if (isset($_SESSION['peran_pengguna'])) {
         <p>Silahkan masuk</p>
 
         <div class="form-floating mb-3">
-          <input type="email" class="form-control" id="email" name="email" placeholder="name@example.com">
-          <label for="email">Email</label>
+          <input type="username" class="form-control" id="username" name="username" placeholder="Username">
+          <label for="username" style="color: black;">Username</label>
         </div>
 
         <div class="form-floating mb-3">
           <input type="password" class="form-control" id="password" name="password" placeholder="Password">
-          <label for="email">Password</label>
+          <label for="email" style="color: black;">Password</label>
         </div>
 
         <?php 
@@ -94,7 +94,7 @@ if (isset($_SESSION['peran_pengguna'])) {
   <script>
   // Memberikan fokus otomatis pada input email saat halaman dimuat
   window.onload = function() {
-    document.getElementById("email").focus();
+    document.getElementById("username").focus();
   };
   </script>
 </body>

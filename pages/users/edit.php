@@ -9,13 +9,7 @@
         value="<?php echo $pengguna['nama_pengguna']; ?>">
     </div>
   </div>
-  <div class="row mb-3">
-    <label for="email" class="col-sm-3 col-form-label">Email:</label>
-    <div class="col-sm-9">
-      <input type="email" class="form-control form-control-sm" id="email" name="email"
-        value="<?php echo $pengguna['email']; ?>">
-    </div>
-  </div>
+
   <input type="hidden" class="form-control form-control-sm" id="password" name="password"
     value="<?php echo $pengguna['password']; ?>">
   <div class="row mb-3">
