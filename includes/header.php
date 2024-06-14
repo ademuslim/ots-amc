@@ -63,7 +63,7 @@ if (isset($_SESSION['error_message'])) {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title><?= isset($page_title) ? "$page_title | IMS By AMC" : 'IMS By AMC' ?></title>
+  <title><?= isset($page_title) ? "$page_title | Sistem Lembur" : 'Sistem Lembur' ?></title>
   <script src="<?= base_url('assets/js/jquery.js'); ?>"></script>
   <!-- DataTables Responsive Bootstrap5 CSS-->
   <link rel="stylesheet" href="<?= base_url('assets/css/bootstrap.min.css'); ?>">
@@ -177,8 +177,18 @@ if (isset($_SESSION['error_message'])) {
     color: #000;
   }
 
+  .day.pending-lembur {
+    background-color: orange;
+    color: white;
+  }
+
   .day.lembur {
     background-color: green;
+    color: white;
+  }
+
+  .day.batal-lembur {
+    background-color: red;
     color: white;
   }
 

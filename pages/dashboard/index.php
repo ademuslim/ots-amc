@@ -2,16 +2,39 @@
 $page_title = "Dashboard";
 require_once '../../includes/header.php';
 
-// Ambil data lembur karyawan
 $id_karyawan = $karyawan_log['id_karyawan'] ?? null; // Ubah cara mendapatkan ID karyawan
-$status = 'disetujui';
-$karyawanLemburData = getLemburData($id_karyawan, $status);
+
+// ////////////////////////////////////////////
+// Ambil data lembur karyawan status pending
+$status1 = 'pending';
+$karyawanLemburDataPending = getLemburData($id_karyawan, $status1);
 
 // Proses data lembur ke dalam array tanggal
-$lemburDates = [];
-foreach ($karyawanLemburData as $lembur) {
-    $lemburDates[$lembur['tanggal_pengajuan']] = true;
+$lemburDatesPending = [];
+foreach ($karyawanLemburDataPending as $lemburPending) {
+    $lemburDatesPending[$lemburPending['tanggal_pengajuan']] = true;
 }
+
+// Ambil data lembur karyawan status disetujui
+$status2 = 'disetujui';
+$karyawanLemburDataDiSetujui = getLemburData($id_karyawan, $status2);
+
+// Proses data lembur ke dalam array tanggal
+$lemburDatesDiSetujui = [];
+foreach ($karyawanLemburDataDiSetujui as $lemburDiSetujui) {
+    $lemburDatesDiSetujui[$lemburDiSetujui['tanggal_pengajuan']] = true;
+}
+
+// Ambil data lembur karyawan status ditolak
+$status3 = 'ditolak';
+$karyawanLemburDataDiTolak = getLemburData($id_karyawan, $status3);
+
+// Proses data lembur ke dalam array tanggal
+$lemburDatesDiTolak = [];
+foreach ($karyawanLemburDataDiTolak as $lemburDiTolak) {
+    $lemburDatesDiTolak[$lemburDiTolak['tanggal_pengajuan']] = true;
+}
+// ////////////////////////////////////////
 
 // Mendapatkan bulan dan tahun yang dipilih (jika ada), atau gunakan nilai default bulan saat ini
 $selectedMonth = isset($_GET['month']) ? $_GET['month'] : date('m');
@@ -61,12 +84,8 @@ $currentMonthYear = formatTanggalIndonesia($currentDate);
 </div>
 
 <div class="row mb-4">
-  <!-- Data Lembur -->
   <div class="col">
     <div class="card d-flex flex-column h-100">
-      <div class="card-header">
-        Data Lembur Anda Bulan <?= $bulanIndonesia[$selectedMonth] . ' ' . $selectedYear ?>
-      </div>
       <div class="card-body">
         <form action="" method="GET">
           <div class="row align-items-center">
@@ -94,13 +113,77 @@ $currentMonthYear = formatTanggalIndonesia($currentDate);
             <div class="col-auto">
               <button type="submit" class="btn btn-primary">Filter</button>
             </div>
+            <div class="col-auto">
+              <button type="button" class="btn btn-primary btn-sm">
+                <a href="<?= base_url('pages/dashboard'); ?>"
+                  class="nav-link text-dark bg-transparent <?= setActivePage('pages/dashboard'); ?>">
+                  <span class="text-link">
+                    Refresh
+                  </span>
+                </a>
+              </button>
+            </div>
           </div>
         </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Lembur Di Setujui -->
+<div class="row mb-4">
+  <!-- Data Lembur -->
+  <div class="col">
+    <div class="card d-flex flex-column h-100">
+      <div class="card-header">
+        Data Lembur Anda Bulan <?= $bulanIndonesia[$selectedMonth] . ' ' . $selectedYear ?> Disetujui
       </div>
       <div class="card-body">
         <div class="calendar">
           <?php foreach ($dates as $date): ?>
-          <div class="day <?= isset($lemburDates[$date]) ? 'lembur' : '' ?>">
+          <div class="day <?= isset($lemburDatesDiSetujui[$date]) ? 'lembur' : '' ?>">
+            <?= (new DateTime($date))->format('j') ?>
+          </div>
+          <?php endforeach; ?>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Lembur Pending -->
+<div class="row mb-4">
+  <!-- Data Lembur -->
+  <div class="col">
+    <div class="card d-flex flex-column h-100">
+      <div class="card-header">
+        Data Lembur Anda Bulan <?= $bulanIndonesia[$selectedMonth] . ' ' . $selectedYear ?> Pending
+      </div>
+      <div class="card-body">
+        <div class="calendar">
+          <?php foreach ($dates as $date): ?>
+          <div class="day <?= isset($lemburDatesPending[$date]) ? 'pending-lembur' : '' ?>">
+            <?= (new DateTime($date))->format('j') ?>
+          </div>
+          <?php endforeach; ?>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Lembur Di Tolak -->
+<div class="row mb-4">
+  <!-- Data Lembur -->
+  <div class="col">
+    <div class="card d-flex flex-column h-100">
+      <div class="card-header">
+        Data Lembur Anda Bulan <?= $bulanIndonesia[$selectedMonth] . ' ' . $selectedYear ?> Ditolak
+      </div>
+      <div class="card-body">
+        <div class="calendar">
+          <?php foreach ($dates as $date): ?>
+          <div class="day <?= isset($lemburDatesDiTolak[$date]) ? 'batal-lembur' : '' ?>">
             <?= (new DateTime($date))->format('j') ?>
           </div>
           <?php endforeach; ?>

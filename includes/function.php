@@ -165,18 +165,18 @@ function authenticateByUserId($user_id) {
 }
 
 // Fungsi tambah pengguna
-function register($id_pengguna, $nama_pengguna, $email, $password, $tipe_pengguna, $id_karyawan) {
+function register($id_pengguna, $nama_pengguna, $password, $tipe_pengguna, $id_karyawan) {
   global $conn;
 
   // Hash password
   $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
   // Insert user data into database
-  $query = "INSERT INTO pengguna (id_pengguna, nama_pengguna, email, password, tipe_pengguna, id_karyawan) VALUES (?, ?, ?, ?, ?, ?)";
+  $query = "INSERT INTO pengguna (id_pengguna, nama_pengguna, password, tipe_pengguna, id_karyawan) VALUES (?, ?, ?, ?, ?)";
   $stmt = mysqli_prepare($conn, $query);
   
   // Bind parameters
-  mysqli_stmt_bind_param($stmt, "ssssss", $id_pengguna, $nama_pengguna, $email, $hashed_password, $tipe_pengguna, $id_karyawan);
+  mysqli_stmt_bind_param($stmt, "sssss", $id_pengguna, $nama_pengguna, $hashed_password, $tipe_pengguna, $id_karyawan);
   
   // Execute statement
   $result = mysqli_stmt_execute($stmt);
@@ -605,14 +605,39 @@ function getSingleValue($query, $column) {
     }
 }
 
+// function calculateDuration($start, $end) {
+//     $start = strtotime($start);
+//     $end = strtotime($end);
+//     $duration = $end - $start;
+//     $hours = floor($duration / 3600);
+//     $minutes = floor(($duration % 3600) / 60);
+//     return sprintf('%02d:%02d', $hours, $minutes);
+// }
+
 function calculateDuration($start, $end) {
+    // Konversi waktu mulai dan waktu akhir menjadi timestamp
     $start = strtotime($start);
     $end = strtotime($end);
+    
+    // Hitung durasi dalam detik
     $duration = $end - $start;
+    
+    // Hitung jumlah jam dan menit
     $hours = floor($duration / 3600);
     $minutes = floor(($duration % 3600) / 60);
+    
+    // Bulatkan menit berdasarkan kondisinya
+    if ($minutes >= 30) {
+        $hours += 1; // Tambahkan satu jam
+    }
+    
+    // Set menit menjadi 0 setelah pembulatan
+    $minutes = 0;
+
+    // Format hasil menjadi HH:MM
     return sprintf('%02d:%02d', $hours, $minutes);
 }
+
 
 function getStatusPengajuan($id_pengajuan) {
     global $conn; // Menggunakan koneksi global
@@ -706,38 +731,48 @@ function formatTanggalIndonesia($tanggal) {
 
     return "$bulan $tahun"; // Format "Bulan Tahun" seperti "Januari 2023"
 }
-
-// Buat fungsi baru untuk mengambil semua data lembur dari semua karyawan
 function getAllLemburData($status = null, $month = null, $year = null) {
     global $conn;
 
-    // Query untuk mengambil data lembur dari semua karyawan
+    // Query untuk mengambil data lembur dari semua karyawan dengan persetujuan terbaru
     $query = "SELECT pl.tanggal_pengajuan, pl.id_pengajuan, pl.keterangan, 
                      pl.waktu_mulai, pl.waktu_selesai, 
                      pls.status
               FROM pengajuan_lembur pl
-              INNER JOIN persetujuan_lembur pls ON pl.id_pengajuan = pls.id_pengajuan";
+              INNER JOIN persetujuan_lembur pls 
+              ON pl.id_pengajuan = pls.id_pengajuan
+              INNER JOIN (
+                  SELECT id_pengajuan, MAX(tanggal_persetujuan) AS max_tanggal
+                  FROM persetujuan_lembur
+                  GROUP BY id_pengajuan
+              ) latest_approval 
+              ON pls.id_pengajuan = latest_approval.id_pengajuan
+              AND pls.tanggal_persetujuan = latest_approval.max_tanggal
+              WHERE 1=1";
+
+    $params = [];
+    $types = '';
 
     // Tambahkan kondisi WHERE jika status ditentukan
     if ($status !== null) {
-        $query .= " WHERE pls.status = ?";
+        $query .= " AND pls.status = ?";
+        $types .= 's';
+        $params[] = $status;
     }
 
     // Jika bulan dan tahun ditentukan, tambahkan kondisi untuk memfilter data berdasarkan bulan dan tahun
     if ($month !== null && $year !== null) {
         $query .= " AND MONTH(pl.tanggal_pengajuan) = ? AND YEAR(pl.tanggal_pengajuan) = ?";
+        $types .= 'ii';
+        $params[] = $month;
+        $params[] = $year;
     }
 
     $stmt = $conn->prepare($query);
 
-    // Binding parameter status jika ditentukan
-    if ($status !== null) {
-        $stmt->bind_param('s', $status);
-    }
-
-    // Binding parameter bulan dan tahun jika ditentukan
-    if ($month !== null && $year !== null) {
-        $stmt->bind_param('ss', $month, $year);
+    // Binding parameter jika ada
+    if (!empty($params)) {
+        $stmt->bind_param($types, ...$params);
     }
 
     $stmt->execute();
@@ -749,4 +784,28 @@ function getAllLemburData($status = null, $month = null, $year = null) {
     }
 
     return $data;
+}
+
+// function calculateDurationInDecimal($start, $end) {
+//     $start = strtotime($start);
+//     $end = strtotime($end);
+//     $duration = $end - $start;
+//     $hours = $duration / 3600; // Total jam dalam desimal
+//     return $hours;
+// }
+
+function calculateRoundedDuration($start, $end) {
+    $start = strtotime($start);
+    $end = strtotime($end);
+    $duration = $end - $start;
+
+    $hours = floor($duration / 3600);
+    $minutes = floor(($duration % 3600) / 60);
+
+    // Bulatkan menit
+    if ($minutes >= 30) {
+        $hours += 1;
+    }
+
+    return $hours;
 }

@@ -9,43 +9,43 @@ if (isset($_POST['add'])) {
   // Ambil nilai-nlai langsung dari $_POST
   $id_karyawan = $_POST['karyawan'];
   $nama_pengguna = strtolower($_POST['nama_pengguna']);
-  $email = $_POST['email'];
   $password = $_POST['password'];
   $confirm_password = $_POST["confirm_password"];
   $tipe_pengguna = $_POST['tipe_pengguna'];
 
   // Pastikan kedua password tidak kosong
   if (empty($password) || empty($confirm_password)) {
-    $register_error = "Password dan Ulangi Password harus diisi.";
-    header("Location: " . base_url('auth/register.php?error=' . urlencode($register_error)));
+    // $register_error = "Password dan Ulangi Password harus diisi.";
+    $_SESSION['error_message'] = "Password dan Ulangi Password harus diisi.";
+    header("Location: index.php");
     exit();
   }
 
   // Periksa apakah password dan ulangi password cocok
   if ($password !== $confirm_password) {
       // Jika tidak cocok, kembalikan ke halaman registrasi dengan pesan kesalahan
-      $register_error = "Password dan Ulangi Password tidak cocok.";
-      header("Location: " . base_url('auth/register.php?error=' . urlencode($register_error)));
+      // $register_error = "Password dan Ulangi Password tidak cocok.";
+      $_SESSION['error_message'] = "Password dan Ulangi Password tidak cocok.";
+      header("Location: index.php");
       exit();
   }
 
-  // Periksa apakah email sudah ada
-  if (isValueExists('pengguna', 'email', $email)) {
-    $_SESSION['error_message'] = "Email sudah terdaftar.";
+  // Periksa apakah Nama pengguna sudah ada
+  if (isValueExists('pengguna', 'nama_pengguna', $nama_pengguna)) {
+    $_SESSION['error_message'] = "Nama pengguna sudah terdaftar.";
     header("Location: index.php");
     exit();
   }
 
   // Lakukan sanitasi pada input
   $nama_pengguna = sanitizeInput($nama_pengguna);
-  $email = sanitizeInput($email);
   $password = sanitizeInput($password);
   
   // Generate UUID untuk kolom id_pengguna
   $id_pengguna = Ramsey\Uuid\Uuid::uuid4()->toString();
 
   // Lakukan registrasi pengguna (Insert)
-  $result = register($id_pengguna, $nama_pengguna, $email, $password, $tipe_pengguna, $id_karyawan);
+  $result = register($id_pengguna, $nama_pengguna, $password, $tipe_pengguna, $id_karyawan);
 
   // Periksa apakah data berhasil ditambahkan
   if ($result > 0) {
@@ -73,13 +73,12 @@ if (isset($_POST['add'])) {
   // Ambil nilai-nilai dari form edit
   $id_pengguna = $_POST['id_pengguna'];
   $nama_pengguna = strtolower($_POST['nama_pengguna']);
-  $email = $_POST['email'];
   $password = $_POST['password'];
   $tipe_pengguna = $_POST['tipe_pengguna'];
 
-  // Periksa apakah email sudah ada (kecuali untuk pengguna yang sedang diedit)
-  if (isValueExists('pengguna', 'email', $email, $id_pengguna, 'id_pengguna')) {
-    $_SESSION['error_message'] = "Email sudah terdaftar.";
+  // Periksa apakah Username sudah ada (kecuali untuk pengguna yang sedang diedit)
+  if (isValueExists('pengguna', 'nama_pengguna', $nama_pengguna, $id_pengguna, 'id_pengguna')) {
+    $_SESSION['error_message'] = "Username sudah terdaftar.";
     header("Location: index.php");
     exit();
   }
@@ -90,7 +89,6 @@ if (isset($_POST['add'])) {
   // Data yang akan diupdate di tabel pengguna
   $data = [
     'nama_pengguna' => $nama_pengguna,
-    'email' => $email,
     'password' => $password,
     'tipe_pengguna' => $tipe_pengguna
   ];

@@ -36,13 +36,14 @@ if (isset($_POST['add'])) {
       // Buat status default "pending" persetujuan_lembur
       $id_persetujuan = Ramsey\Uuid\Uuid::uuid4()->toString();
       $status = "pending";
+      $tanggal_persetujuan = date('Y-m-d H:i:s');
 
       // Data default yang akan dimasukkan ke dalam tabel persetujuan_lembur
       $persetujuan_lembur_data = [
           'id_persetujuan' => $id_persetujuan,
           'id_pengajuan' => $id_pengajuan,
           // 'disetujui_oleh' => $disetujui_oleh,
-          // 'tanggal_persetujuan' => $tanggal_persetujuan,
+          'tanggal_persetujuan' => $tanggal_persetujuan,
           'status' => $status
       ];
 

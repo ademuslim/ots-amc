@@ -4,10 +4,11 @@ require '../../includes/header.php';
 
 $mainTable = 'pengajuan_lembur';
 $joinTables = [
-  ['karyawan', 'pengajuan_lembur.id_karyawan = karyawan.id_karyawan']
+  ['karyawan', 'pengajuan_lembur.id_karyawan = karyawan.id_karyawan'],
+  ['jabatan', 'karyawan.id_jabatan = jabatan.id_jabatan']
 ];
 
-$columns = 'pengajuan_lembur.*, karyawan.nama_karyawan';
+$columns = 'pengajuan_lembur.*, karyawan.nama_karyawan, jabatan.harga_lembur';
 $orderBy = 'pengajuan_lembur.tanggal_pengajuan DESC';
 
 $data_pengajuan_lembur = selectDataJoin($mainTable, $joinTables, $columns, "", $orderBy);
@@ -36,6 +37,8 @@ $data_pengajuan_lembur = selectDataJoin($mainTable, $joinTables, $columns, "", $
       <th>Waktu Mulai</th>
       <th>Waktu Selesai</th>
       <th>Durasi Lembur</th>
+      <th>Harga Lembur / Jam</th>
+      <th>Total Harga Lembur</th>
       <th>Keterangan</th>
       <th>Aksi</th>
     </tr>
@@ -73,6 +76,14 @@ $data_pengajuan_lembur = selectDataJoin($mainTable, $joinTables, $columns, "", $
       <td><?= date('H:i', strtotime($pengajuan['waktu_mulai'])) ?></td>
       <td><?= date('H:i', strtotime($pengajuan['waktu_selesai'])) ?></td>
       <td><?= calculateDuration($pengajuan['waktu_mulai'], $pengajuan['waktu_selesai']) ?></td>
+      <td><?= htmlspecialchars(number_format($pengajuan['harga_lembur'], 0, ',', '.')) ?></td>
+      <td>
+        <?php
+        $durasiJamBulat = calculateRoundedDuration($pengajuan['waktu_mulai'], $pengajuan['waktu_selesai']);
+        $totalHargaLembur = $durasiJamBulat * $pengajuan['harga_lembur'];
+        echo htmlspecialchars(number_format($totalHargaLembur, 0, ',', '.'));
+      ?>
+      </td>
       <td><?= ucwords($pengajuan['keterangan']) ?></td>
 
       <?php if ($_SESSION['peran_pengguna'] === 'staff'): ?>

@@ -12,7 +12,7 @@
       <div class="modal-body">
         <form action="process.php" method="POST">
 
-          <!-- Input karyawan -->
+          <!-- Input id karyawan -->
           <div class="row mb-3">
             <label for="karyawan" class="col-sm-3 col-form-label">Nama Karyawan:</label>
             <div class="col-sm-9">
@@ -34,6 +34,7 @@
             </div>
           </div>
 
+          <!-- Input username -->
           <div class="row mb-3">
             <label for="nama_pengguna" class="col-sm-3 col-form-label">Nama Pengguna:</label>
             <div class="col-sm-9">
@@ -42,13 +43,7 @@
             </div>
           </div>
 
-          <div class="row mb-3">
-            <label for="email" class="col-sm-3 col-form-label">Email:</label>
-            <div class="col-sm-9">
-              <input type="email" class="form-control form-control-sm" id="email" name="email" required>
-            </div>
-          </div>
-
+          <!-- Input PW -->
           <div class="row mb-3">
             <label for="password" class="col-sm-3 col-form-label">Password:</label>
             <div class="col-sm-9">
@@ -56,6 +51,7 @@
             </div>
           </div>
 
+          <!-- Input CPW -->
           <div class="row mb-3">
             <label for="confirm_password" class="col-sm-3 col-form-label">Ulangi Password:</label>
             <div class="col-sm-9">
@@ -64,6 +60,7 @@
             </div>
           </div>
 
+          <!-- Input tipe pengguna -->
           <div class="row mb-3">
             <label for="tipe_pengguna" class="col-sm-3 col-form-label">Tipe Pengguna:</label>
             <div class="col-sm-9">

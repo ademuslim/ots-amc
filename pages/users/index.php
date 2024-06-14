@@ -24,7 +24,7 @@ $data_pengguna = selectDataJoin($mainTable, $joinTables, $columns);
     <tr>
       <th>No.</th>
       <th colspan="4">Nama Karyawan</th>
-      <th colspan="4">Nama Pengguna</th>
+      <th colspan="4">Username</th>
       <th>Tipe Pengguna</th>
       <th>Aksi</th>
     </tr>
